@@ -10,8 +10,3 @@ type Message struct {
 	Target  []int64 `json:"t"` //消息的目的用户
 	Payload string  `json:"p"`
 }
-
-// 当缓存区存满后
-var fullMsg = Message{
-	Subject: "full",
-}

@@ -59,7 +59,7 @@ func connect() (conn *websocket.Conn) {
 	var err error
 	for {
 		headers := http.Header{}
-		headers.Add("a", "xxx") //这里时间要冲新生成
+		headers.Add("a", "xxx") //这里时间要生新生成
 		if conn, _, err = websocket.DefaultDialer.Dial(ws, headers); err != nil {
 			log.Println(err)
 			log.Println("Connection lost, reconnecting")

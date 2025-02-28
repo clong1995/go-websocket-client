@@ -1,16 +1,17 @@
 package websocket
 
-import "errors"
+import (
+	"errors"
+	"github.com/clong1995/go-websocket-client/message"
+	"log"
+)
 
-func Send(msg Message) (err error) {
-	/*if err = conn.WriteJSON(msg); err != nil {
-		log.Println(err)
-		return
-	}*/
+func Send(msg message.Msg) (err error) {
 	select {
-	case messageQueue <- msg:
+	case message.Queue <- msg:
 	default:
 		err = errors.New("message queue is full")
+		log.Println(err)
 	}
 	return
 }

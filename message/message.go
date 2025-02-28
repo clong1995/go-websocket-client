@@ -1,7 +1,7 @@
 package message
 
 // Queue 消息队列
-var Queue = make(chan Msg, 100)
+var Queue = make(chan Msg, 1000)
 
 // Msg 只传递动作信息，不得传递其他数据
 type Msg struct {

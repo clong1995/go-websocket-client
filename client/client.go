@@ -1,9 +1,9 @@
 package client
 
 import (
+	"fmt"
 	"github.com/clong1995/go-config"
 	"github.com/gorilla/websocket"
-	"log"
 	"sync"
 	"time"
 )
@@ -17,30 +17,27 @@ type client struct {
 	mu   sync.RWMutex
 }
 
-func connect() {
+func connect() (err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.conn != nil {
 		_ = c.conn.Close()
 	}
 	ws := config.Value("WEBSOCKET")
-	for {
-		conn, _, err := websocket.DefaultDialer.Dial(ws, nil)
-		if err != nil {
-			log.Println("[websocket] lost, reconnecting: ", err)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		c.conn = conn
-		log.Println("[websocket] connected: ", ws)
-		break
+	c.conn, _, err = websocket.DefaultDialer.Dial(ws, nil)
+	if err != nil {
+		return
 	}
+	fmt.Println("[websocket] connected: ", ws)
+	return
 }
 
 func Close() {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	_ = c.conn.Close()
+	if c.conn != nil {
+		_ = c.conn.Close()
+	}
 	wsClose <- true
 }
 
@@ -53,8 +50,6 @@ func listen() {
 	for {
 		//当前客户端不需要接收消息
 		if _, _, err := c.conn.ReadMessage(); err != nil {
-			log.Println(err)
-			log.Println("[websocket] reconnecting...")
 			return
 		}
 	}
@@ -65,10 +60,15 @@ func Connect() {
 		for {
 			select {
 			case <-wsClose:
-				log.Println("[websocket] closed")
+				fmt.Println("[websocket] closed")
 				return
 			default:
-				connect()
+				err := connect()
+				if err != nil {
+					fmt.Println("[websocket] reconnecting")
+					time.Sleep(1 * time.Second)
+					continue
+				}
 				listen()
 			}
 		}

@@ -60,7 +60,7 @@ func Connect() {
 		for {
 			select {
 			case <-wsClose:
-				fmt.Println("[websocket] closed")
+				fmt.Println("[websocket] exited!")
 				return
 			default:
 				err := connect()

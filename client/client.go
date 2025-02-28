@@ -38,6 +38,9 @@ func connect() {
 }
 
 func Close() {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	_ = c.conn.Close()
 	wsClose <- true
 }
 
@@ -62,6 +65,7 @@ func Connect() {
 		for {
 			select {
 			case <-wsClose:
+				log.Println("[websocket] closed")
 				return
 			default:
 				connect()
@@ -69,4 +73,5 @@ func Connect() {
 			}
 		}
 	}()
+
 }

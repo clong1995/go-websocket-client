@@ -1,4 +1,4 @@
-package websocket
+package client
 
 import (
 	"errors"
@@ -6,9 +6,12 @@ import (
 	"log"
 )
 
+// Queue 消息队列
+var queue = make(chan message.Msg, 1000)
+
 func Send(msg message.Msg) (err error) {
 	select {
-	case message.Queue <- msg:
+	case queue <- msg:
 	default:
 		err = errors.New("message queue is full")
 		log.Println(err)

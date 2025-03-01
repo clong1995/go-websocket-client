@@ -44,7 +44,7 @@ func Close() {
 		_ = c.conn.Close()
 	}
 	cancel()
-	close(message.Queue)
+	close(queue)
 	serverClose <- true
 }
 
@@ -89,7 +89,7 @@ func Connect() {
 			select {
 			case <-ctx.Done():
 				return
-			case msg, ok := <-message.Queue:
+			case msg, ok := <-queue:
 				if !ok {
 					return
 				}
@@ -113,7 +113,7 @@ func send(msg message.Msg) {
 	if err != nil {
 		log.Println(err)
 		select {
-		case message.Queue <- msg: //发生问题后尝试在写回消息队列
+		case queue <- msg: //发生问题后尝试在写回消息队列
 		default:
 		}
 		return

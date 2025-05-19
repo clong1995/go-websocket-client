@@ -7,10 +7,3 @@ type Msg struct {
 	Target  []int64 `json:"t"` //消息的目的用户
 	Payload string  `json:"p"`
 }
-
-func ChatMsg(user, contact int64) Msg {
-	return Msg{
-		Subject: "chat",
-		Target:  []int64{user, contact},
-	}
-}

@@ -23,7 +23,7 @@ type client struct {
 	mu   sync.RWMutex
 }
 
-func connect(machineId string) (err error) {
+func connect() (err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.conn != nil {
@@ -31,7 +31,7 @@ func connect(machineId string) (err error) {
 	}
 	ws := config.Value("WEBSOCKET")
 	c.conn, _, err = websocket.DefaultDialer.Dial(ws, http.Header{
-		"Server-Id": []string{machineId},
+		"Server-Id": []string{config.Value("MACHINE ID")},
 	})
 	if err != nil {
 		return
@@ -67,7 +67,7 @@ func listen() {
 	}
 }
 
-func Connect(machineId string) {
+func Connect() {
 	go func() {
 		for {
 			select {
@@ -75,7 +75,7 @@ func Connect(machineId string) {
 				fmt.Println("[websocket] exited!")
 				return
 			default:
-				if err := connect(machineId); err == nil {
+				if err := connect(); err == nil {
 					listen()
 				}
 				//<=== 延时1秒后重试，在这里为防止`listen()`关闭后，立即进入 `connect()`，

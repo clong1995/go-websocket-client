@@ -7,6 +7,7 @@ import (
 	"github.com/clong1995/go-websocket-client/message"
 	"github.com/gorilla/websocket"
 	"log"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -22,14 +23,16 @@ type client struct {
 	mu   sync.RWMutex
 }
 
-func connect() (err error) {
+func connect(machineId string) (err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.conn != nil {
 		_ = c.conn.Close()
 	}
 	ws := config.Value("WEBSOCKET")
-	c.conn, _, err = websocket.DefaultDialer.Dial(ws, nil)
+	c.conn, _, err = websocket.DefaultDialer.Dial(ws, http.Header{
+		"Server-Id": []string{machineId},
+	})
 	if err != nil {
 		return
 	}
@@ -64,7 +67,7 @@ func listen() {
 	}
 }
 
-func Connect() {
+func Connect(machineId string) {
 	go func() {
 		for {
 			select {
@@ -72,8 +75,7 @@ func Connect() {
 				fmt.Println("[websocket] exited!")
 				return
 			default:
-				err := connect()
-				if err == nil {
+				if err := connect(machineId); err == nil {
 					listen()
 				}
 				//<=== 延时1秒后重试，在这里为防止`listen()`关闭后，立即进入 `connect()`，
